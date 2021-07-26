@@ -53,7 +53,7 @@ const getCreateErrorsForNonCreatableFields = async (
 ): Promise<ReadonlyArray<ChangeError>> => {
   const afterResolved = await resolveValues(after, getLookUpName)
   return awu(Object.values((await afterResolved.getType()).fields))
-    .filter(field => !field.annotations[FIELD_ANNOTATIONS.CREATABLE])
+    .filter(field => field.annotations[FIELD_ANNOTATIONS.CREATABLE] === false)
     .map(field => {
       if (!_.isUndefined(afterResolved.value[field.name])) {
         return {

@@ -22,6 +22,13 @@ describe('custom object instances change validator', () => {
   const obj = new ObjectType({
     elemID: new ElemID('salesforce', 'obj'),
     fields: {
+      CreatableAndUpdateableAreUndefined: {
+        refType: createRefToElmWithValue(BuiltinTypes.STRING),
+        annotations: {
+          [FIELD_ANNOTATIONS.UPDATEABLE]: undefined,
+          [FIELD_ANNOTATIONS.CREATABLE]: undefined,
+        },
+      },
       nonUpdateable: {
         refType: createRefToElmWithValue(BuiltinTypes.STRING),
         annotations: {
@@ -67,6 +74,16 @@ describe('custom object instances change validator', () => {
       )
       expect(changeErrors).toHaveLength(0)
     })
+
+    it('should have no change error when adding fields with undefined annotation', async () => {
+      instance = new InstanceElement('instance', obj, {
+        CreatableAndUpdateableAreUndefined: 'youCanCreateMe',
+      })
+      changeErrors = await customObjectInstancesValidator(
+        [toChange({ after: instance })]
+      )
+      expect(changeErrors).toHaveLength(0)
+    })
   })
 
   describe('onModify of instance of customObject', () => {
@@ -97,6 +114,15 @@ describe('custom object instances change validator', () => {
     it('should have no change error when editing updateable fields only', async () => {
       const afterInstance = before.clone()
       afterInstance.value.nonCreatable = 'IamTryingToUpdateBeforeICan'
+      changeErrors = await customObjectInstancesValidator(
+        [toChange({ before, after })]
+      )
+      expect(changeErrors).toHaveLength(0)
+    })
+
+    it('should have no change error when editing fields with undefined updateable annotation', async () => {
+      const afterInstance = before.clone()
+      afterInstance.value.CreatableAndUpdateableAreUndefined = 'IamTryingToUpdateBeforeICan'
       changeErrors = await customObjectInstancesValidator(
         [toChange({ before, after })]
       )

@@ -70,6 +70,14 @@ describe('Custom Object Instances CRUD', () => {
           [constants.API_NAME]: 'NotCreatable',
         },
       },
+      CreatableAndUpdateableAreUndefined: {
+        refType: createRefToElmWithValue(BuiltinTypes.STRING),
+        annotations: {
+          [constants.FIELD_ANNOTATIONS.CREATABLE]: undefined,
+          [constants.FIELD_ANNOTATIONS.UPDATEABLE]: undefined,
+          [constants.API_NAME]: 'CreatableAndUpdateableAreUndefined',
+        },
+      },
       AnotherField: {
         refType: createRefToElmWithValue(BuiltinTypes.STRING),
         annotations: {
@@ -115,6 +123,7 @@ describe('Custom Object Instances CRUD', () => {
     {
       SaltoName: 'existingInstance',
       NotCreatable: 'DontSendMeOnCreate',
+      CreatableAndUpdateableAreUndefined: 'SendMeOnUpdateAndInsert',
       NumField: 1,
       Address: {
         city: 'Tel-Aviv',
@@ -167,6 +176,7 @@ describe('Custom Object Instances CRUD', () => {
       SaltoName: 'newInstanceWithRef',
       AnotherField: new ReferenceExpression(mockElemID, 'Type'),
       NumField: 2,
+      CreatableAndUpdateableAreUndefined: 'SendMeOnUpdateAndInsert',
     }
   )
   const anotherNewInstanceName = 'anotherNewInstance'
@@ -454,6 +464,9 @@ describe('Custom Object Instances CRUD', () => {
             expect(updateCall[3][0].NotCreatable).toEqual('DontSendMeOnCreate')
             // Should deploy fields with no values as null
             expect(updateCall[3][0].FieldWithNoValue).toBeNull()
+            // Should treat undefined creatable and updateable annotations as true
+            expect(updateCall[3][0].CreatableAndUpdateableAreUndefined).toBeDefined()
+            expect(updateCall[3][0].CreatableAndUpdateableAreUndefined).toEqual('SendMeOnUpdateAndInsert')
           })
 
           it('Should call load operation with insert for the "new" record', () => {
@@ -470,6 +483,8 @@ describe('Custom Object Instances CRUD', () => {
             expect(insertCall[3][0].AnotherField).toEqual('Type')
             // Should deploy fields with no values as null
             expect(insertCall[3][0].FieldWithNoValue).toBeNull()
+            expect(insertCall[3][0].CreatableAndUpdateableAreUndefined).toBeDefined()
+            expect(insertCall[3][0].CreatableAndUpdateableAreUndefined).toEqual('SendMeOnUpdateAndInsert')
           })
 
           it('Should have result with 2 applied changes, add 2 instances with new Id', async () => {
