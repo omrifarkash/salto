@@ -161,11 +161,11 @@ const createCustomizations = (): Record<string, InstanceDeployApiDefinitions> =>
                 },
               },
               request: {
+                earlySuccess: true,
                 endpoint: {
                   path: '/wiki/rest/api/content/{id}/restriction',
                   method: 'delete',
                 },
-                earlySuccess: true,
               },
             },
             {
