@@ -15,6 +15,7 @@
  */
 import _ from 'lodash'
 import { definitions, deployment } from '@salto-io/adapter-components'
+import { getChangeData, isModificationChange } from '@salto-io/adapter-api'
 import { AdditionalAction, ClientOptions } from '../types'
 import { increasePagesVersion, addSpaceKey } from '../transformation_utils'
 import {
@@ -82,6 +83,26 @@ const createCustomizations = (): Record<string, InstanceDeployApiDefinitions> =>
               },
             },
             {
+              condition: {
+                custom: () => args => {
+                  const defaultPermissions = [
+                    {
+                      operation: 'update'
+                    },
+                  ]
+                  const changeData = getChangeData(args.change).value
+                  const restriction = _.get(changeData, 'restriction')
+                  if (restriction === defaultPermissions) {
+                    return true
+                  }
+                  return false
+                },
+              },
+              request: {
+                earlySuccess: true,
+              },
+            },
+            {
               request: {
                 endpoint: {
                   path: '/wiki/rest/api/content/{id}/restriction',
@@ -118,6 +139,41 @@ const createCustomizations = (): Record<string, InstanceDeployApiDefinitions> =>
               },
             },
             {
+              condition: {
+                custom: () => args => {
+                  const defaultPermissions = [
+                    {
+                      operation: 'update'
+                    },
+                  ]
+                  if (!isModificationChange(args.change)) {
+                    return false
+                  }
+                  const changeData = getChangeData(args.change).value
+                  const restriction = _.get(changeData, 'restriction')
+                  if (args.change.data?.before.value.restriction === restriction) {
+                    return false
+                  }
+                  if (restriction === defaultPermissions) {
+                    return true
+                  }
+                  return false
+                },
+              },
+              request: {
+                endpoint: {
+                  path: '/wiki/rest/api/content/{id}/restriction',
+                  method: 'delete',
+                },
+                earlySuccess: true,
+              },
+            },
+            {
+              condition: {
+                transformForCheck: {
+                  pick: ['restriction'],
+                },
+              },
               request: {
                 endpoint: {
                   path: '/wiki/rest/api/content/{id}/restriction',
