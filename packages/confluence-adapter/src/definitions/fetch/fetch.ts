@@ -101,6 +101,10 @@ const createCustomizations = (
           path: '/wiki/api/v2/spaces',
           queryArgs: {
             'description-format': 'plain',
+            type: ['personal', 'global'],
+          },
+          queryParamsSerializer: {
+            indexes: null,
           },
         },
         transformation: {
