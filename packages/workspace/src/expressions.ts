@@ -262,12 +262,13 @@ const getClonedElements = (elements: Element[]): Element[] => {
     clonedRestOfElements.filter(isObjectType).map(type => [type.elemID.getFullName(), type]),
   )
   const fieldsParents = fields.map(field => field.parent)
-  log.debug('yoyo4 %o', fieldsParents) // TODO_F this is the last log we are seeing
+  log.debug('yoyo4 %d', fieldsParents.length) // TODO_F this is the last log we are seeing
+  log.debug('example %o', fieldsParents.slice(30, 40))
   const clonedMissingParentsMap = new Map(
     fields
       .map(field => field.parent)
       .filter(parent => !clonedTypesMap.has(parent.elemID.getFullName()))
-      .map(parent => [parent.elemID.getFullName(), parent]),
+      .map(parent => [parent.elemID.getFullName(), parent.clone()]),
   )
   log.debug('yoyo5, %d', clonedMissingParentsMap.size)
   if (clonedMissingParentsMap.size > 0) throw new Error('stop here')
