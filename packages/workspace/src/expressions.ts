@@ -263,7 +263,7 @@ const getClonedElements = (elements: Element[]): Element[] => {
   )
   const fieldsParents = fields.map(field => field.parent)
   log.debug('yoyo4 %d', fieldsParents.length) // TODO_F this is the last log we are seeing
-  log.debug('example %o', fieldsParents.slice(30, 40))
+  log.debug('example %o', fieldsParents[35])
   const clonedMissingParentsMap = new Map(
     fields
       .map(field => field.parent)
