@@ -322,11 +322,11 @@ export const resolve = (
       // this will be used to find reference cycles once we finished resolving all references
       const referenceDependencies = new DataNodeMap<Expression>()
 
-      const resolveElementGroup = async (elementGroup: Element[]): Promise<void> => {
+      const resolveElementGroup = async (elementGroup: Element[], depthNumber = 0): Promise<void> => {
         // This map will hold a promise for each async resolve that is required in this element group
         const pendingAsyncResolves = new Map<string, Promise<Element | undefined>>()
         const pendingAsyncOperations: Promise<unknown>[] = []
-
+        log.debug('starting resolveElementGroup with %d elements and depth %d', elementGroup.length, depthNumber)
         const { resolveTypeReference, resolveReferenceExpression, resolveTemplateExpression } = getResolveFunctions({
           resolvedElements,
           elementsSource,
@@ -381,9 +381,10 @@ export const resolve = (
             })
           }
         }
-
+        log.debug('starting to resolveSingleElement %d elements', elementGroup.length)
         // Note - this fills pendingAsyncResolves and pendingAsyncOperations as a side effect
         elementGroup.forEach(resolveSingleElement)
+        log.debug('done resolveSingleElement')
 
         // Note, not using Promise.all here because this might be a very long list and go over the
         // allowed limits of V8
@@ -392,15 +393,18 @@ export const resolve = (
             .map(promise => promise)
             .toArray()
         ).filter(values.isDefined)
+        log.debug('done calculating nextLevelToResolve')
         // Wait for all pending operations, not just the resolves
         await awu(pendingAsyncOperations).forEach(promise => promise)
-
+        log.debug('start resolving nextLevelToResolve %d elements', nextLevelToResolve.length)
         if (nextLevelToResolve.length > 0) {
+          // I believe we're having a deep recursion here
           nextLevelToResolve.forEach(elem => resolvedElements.set(elem.elemID.getFullName(), elem))
-          await resolveElementGroup(nextLevelToResolve)
+          await resolveElementGroup(nextLevelToResolve, depthNumber + 1)
         }
+        log.debug('done resolving nextLevelToResolve')
       }
-
+      log.debug('I believe we get here')
       await resolveElementGroup(allElementsToResolve)
       log.debug('resolve handled a total of %d elements', resolvedElements.size)
 
