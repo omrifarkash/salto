@@ -256,17 +256,22 @@ const getResolveFunctions = ({
 }
 
 const getClonedElements = (elements: Element[]): Element[] => {
+  log.debug('yoyo1')
   const [fields, restOfElements] = _.partition(elements, isField)
+  log.debug('yoyo2')
   const clonedRestOfElements = restOfElements.map(e => e.clone())
+  log.debug('yoyo3')
   const clonedTypesMap = new Map(
     clonedRestOfElements.filter(isObjectType).map(type => [type.elemID.getFullName(), type]),
   )
+  log.debug('yoyo4')
   const clonedMissingParentsMap = new Map(
     fields
       .map(field => field.parent)
       .filter(parent => !clonedTypesMap.has(parent.elemID.getFullName()))
       .map(parent => [parent.elemID.getFullName(), parent.clone()]),
   )
+  log.debug('yoyo5')
   // We want to get the fields from the cloned parents so we keep them pointing the parents
   // that will be resolved and we don't use an uncloned parent type.
   const clonedFields = fields.map(field => {
@@ -284,7 +289,7 @@ const getClonedElements = (elements: Element[]): Element[] => {
     }
     return fieldFromClonedParent
   })
-
+  log.debug('yoyo6')
   return clonedRestOfElements.concat(clonedFields)
 }
 
@@ -299,24 +304,26 @@ export const resolve = (
 ): Promise<Element[]> =>
   log.timeDebug(
     async () => {
+      log.debug('here4')
       // Create a clone of the input elements to ensure we do not modify the input
       const elementsToResolve = getClonedElements(elements)
-
+      log.debug('here5')
       // Since fields technically reference their parent type with the .parent property
       // we need to make sure to resolve all field parents as well
       const fieldParents = elementsToResolve.filter(isField).map(field => field.parent)
-
+      log.debug('here6')
       // We assume that if we got a field and its parent type in the same resolve call, the field's
       // parent will point to the same object type that we got to resolve, so we don't need to resolve
       // both.
       const allElementsToResolve = _.uniqBy(elementsToResolve.concat(fieldParents), elem => elem.elemID.getFullName())
-
+      log.debug('here7')
       const resolvedElements = new Map(
         allElementsToResolve
           .concat(Object.values(BuiltinTypes))
           .concat(Object.values(CoreAnnotationTypes))
           .map(elem => [elem.elemID.getFullName(), elem]),
       )
+      log.debug('here8')
 
       // This graph will hold references that depend on other references
       // this will be used to find reference cycles once we finished resolving all references
@@ -393,7 +400,7 @@ export const resolve = (
             .map(promise => promise)
             .toArray()
         ).filter(values.isDefined)
-        log.debug('done calculating nextLevelToResolve')
+        log.debug('done calculating nextLevelToResolve: %o', nextLevelToResolve)
         // Wait for all pending operations, not just the resolves
         await awu(pendingAsyncOperations).forEach(promise => promise)
         log.debug('start resolving nextLevelToResolve %d elements', nextLevelToResolve.length)
