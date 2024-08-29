@@ -264,8 +264,8 @@ const getClonedElements = (elements: Element[]): Element[] => {
   const fieldsParents = fields
     .map(field => field.parent)
     .filter(parent => !clonedTypesMap.has(parent.elemID.getFullName()))
-  log.debug('yoyo4 %d', fieldsParents.length) // TODO_F this is the last log we are seeing
   log.debug('example %o', fieldsParents[35])
+  log.debug('yoyo4 %d', fieldsParents.length) // TODO_F this is the last log we are seeing
   const clonedMissingParentsMap = new Map(fieldsParents.map(parent => [parent.elemID.getFullName(), parent.clone()]))
   log.debug('yoyo5, %d', clonedMissingParentsMap.size)
   // We want to get the fields from the cloned parents so we keep them pointing the parents
