@@ -261,7 +261,8 @@ const getClonedElements = (elements: Element[]): Element[] => {
   const clonedTypesMap = new Map(
     clonedRestOfElements.filter(isObjectType).map(type => [type.elemID.getFullName(), type]),
   )
-  log.debug('yoyo4') // TODO_F this is the last log we are seeing
+  const fieldsParents = fields.map(field => field.parent)
+  log.debug('yoyo4 %o', fieldsParents) // TODO_F this is the last log we are seeing
   const clonedMissingParentsMap = new Map(
     fields
       .map(field => field.parent)
@@ -269,7 +270,7 @@ const getClonedElements = (elements: Element[]): Element[] => {
       .map(parent => [parent.elemID.getFullName(), parent]),
   )
   log.debug('yoyo5, %d', clonedMissingParentsMap.size)
-  throw new Error('stop here')
+  if (clonedMissingParentsMap.size > 0) throw new Error('stop here')
   // We want to get the fields from the cloned parents so we keep them pointing the parents
   // that will be resolved and we don't use an uncloned parent type.
   const clonedFields = fields.map(field => {
