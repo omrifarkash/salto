@@ -271,7 +271,6 @@ const getClonedElements = (elements: Element[]): Element[] => {
       .map(parent => [parent.elemID.getFullName(), parent.clone()]),
   )
   log.debug('yoyo5, %d', clonedMissingParentsMap.size)
-  if (clonedMissingParentsMap.size > 0) throw new Error('stop here')
   // We want to get the fields from the cloned parents so we keep them pointing the parents
   // that will be resolved and we don't use an uncloned parent type.
   const clonedFields = fields.map(field => {
